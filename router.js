@@ -10,14 +10,15 @@ var express = require('express')
 
 var router = express.Router()
 
-var  student = require('./student')
+var  Student = require('./student1.js')
 
-
+console.log(Student);
 
 router.get('/',function(req,rep){
 
+
 	//异步式编程
-	student.find(function(err,data){
+	Student.find(function(err,data){
 
 		if (err) {
 			return req.status(500).send('页面错误')
@@ -29,7 +30,6 @@ router.get('/',function(req,rep){
 
 
 		
-
 		rep.render('index.html',{
 			student:student
 		})
@@ -68,13 +68,17 @@ router.get('/new',function(req,rep){
 //异步式编程
 router.post('/students/new',function(req,rep){
 
-	console.log(req.body);
 
-	student.save(req.body,function(err){
+	console.log(req.body);
+	let postDate = new Student(req.body)
+
+	postDate.save(function(err){
 
 		if (err) {
-			return req.status(500).send('页面错误')
-		}
+			console.log('保存失败');
+		}	
+
+
 
 
 
@@ -125,7 +129,12 @@ router.post('/students/new',function(req,rep){
 
 router.get('/edit',function(req,rep){
 
-	student.findId(req.query.id,function(err,data){
+
+
+	var dataId = req.query.id.replace(/"/g,'')
+
+
+	Student.findById(dataId,function(err,data){
 		if (err) {
 			console.log('读取文件失败');
 		}
@@ -136,7 +145,7 @@ router.get('/edit',function(req,rep){
 			currentDate : currentDate
 		})	
 
-		// console.log(currentDate);
+		
 
 	})
 
@@ -147,20 +156,18 @@ router.get('/edit',function(req,rep){
 
 router.post('/edit',function(req,rep){
 
+
+
 	var update = req.body
 
 	
 
-	student.update(update,function(err,data){
+	Student.findByIdAndUpdate(update.id,req.body,function(err){
 		if (err) {
-			console.log('保存文件失败');
+			console.log('保存失败');
 		}
 
-
-	console.log('test');	
-	rep.redirect('/')
-		
-
+		rep.redirect('/')
 
 
 	})
@@ -172,19 +179,19 @@ router.post('/edit',function(req,rep){
 // 删除文件
 
 router.get('/delete',function(req,rep){
-	
-	 student.delete(req.body,function(err){
+
+
+	let dataId  = req.query.id.replace(/"/g,'')
+
+
+
+	 Student.findByIdAndRemove(dataId,function(err){
 	 	if (err) {
-	 		return req.status(500).send('页面错误')
+	 		console.log('删除失败');
 	 	}
-
-	 	rep.redirect('/')
-
-
-
 	 })
 
-
+	 rep.redirect('/')
 
 
 })
